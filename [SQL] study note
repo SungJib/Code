@@ -1,0 +1,4 @@
+select *
+from database %name of the database
+--limit 30
+--limit 70
