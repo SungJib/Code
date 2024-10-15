@@ -1,4 +1,242 @@
 select *
-from database %name of the database
+--* means all 
+from database 
+--name of the database 
+where 1=1
+-- 1=1 makes the code look comfortable 
+and rownum <=30
 --limit 30
---limit 70
+--where statn_nm = 'newyork'
+--where statn_nm <> 'newyork'
+--where statn_nm in ('newwork','texas')
+--where statn_nm like '%new' 
+--where statn_nm like '%new%'
+--where statn_nm not like '%new%'
+--where statn_nm rlike 'new\cali'
+and begin_time between '1100' and '1500'
+or end time = '1200'
+
+--------------------------------------------------
+select case when statn_nm <= 100 then 'under 100'
+            when statn_nm <= 200 then 'under 200'
+            when statn_nm <= 300 then 'under 300'
+            else 'over 400' end as  statn_no2
+        , substr(statn_nm, 1) as nameoo
+        ---extract nameoo starting from 1 letter
+        , CONCAT(statn_nm, 'hosun, ho_ln') as statn_no2
+        --gather station number + put 'hosun'
+
+--------------------------------------------------
+select sysdate from dual;
+--select now();
+--select getdate();
+
+select current_date from dual;
+select current_timestamp from dual;
+
+select std_mt
+        , concat(std_mt, '01') as 'date1'
+        --then it shows as 20241001
+        , TO_TIMESTAMP(CONCAT(std_mt,'01'), 'yyyyMMdd') as 'date2'
+        , TO_DATE(CONCAT(std_mt,'01'), 'yyyyMMdd')
+        , ADD_MONTHS(TO_TIMESTAMP(CONCAT(std_mt,'01'), 'yyyyMMdd'),1) as 'date3'
+        --add one month
+        , ADD_MONTHS(TO_TIMESTAMP(CONCAT(std_mt,'01'), 'yyyyMMdd'),-1) as 'date4'
+        --subtract one month
+        , TO_CHAR(ADD_MONTHS(TO_TIMESTAMP(CONCAT(std_mt,'01'), 'yyyyMMdd'),1),'yyyyMMdd') as 'date5'
+        --from TIMESTAMP(ADD_MONTHS(TO_TIMESTAMP(CONCAT(std_mt,'01'), 'yyyyMMdd'),1)'yyyyMM') as 'date6'
+        , date_add(TO_TIMESTAMP(CONCAT(std_mt,'01'), 'yyyyMMdd'),interval 7 day) as 'date6'
+        --add 7 days (month/year and date_sub possible)
+        from dasql.tb_pbtrnsp
+;
+
+select sysdate as time1
+    , cast(sysdate as timestamp) as time2
+    --cast is changing as time type
+    --sysdate is similar but not exactly the same as cast
+    , EXTRACT(year from cast(sysdate as timestamp)) as YEAR
+    --year, month, day, hour, minute ... all possible
+    , TO_CHAR(sysdate, 'YYYY') as YEAR
+    --'MM', 'DD','HH24','MI','SS'...all possible
+from dual;
+
+select TO_DATE('20241001','yyyyMMdd') - TO_DATE('20231001','yyyyMMdd') as date_diff1
+    --calculating time difference
+     , datediff(TO_TIMESTAMP('20241001','yyyyMMdd'), TO_TIMESTAMP('20231001','yyyyMMdd')) as date_diff2
+     , (TO_DATE('20241001','yyyyMMdd') - TO_DATE('20231001','yyyyMMdd'))/365 as year_diff1
+     , (TO_DATE('20241001','yyyyMMdd') - TO_DATE('20231001','yyyyMMdd'))/365*12 as month_diff1
+     , MONTHS_BETWEEN('20220301','20230101') as month_diff2
+     , ROUND((TO_DATE('20241001','yyyyMMdd') - TO_DATE('20231001','yyyyMMdd'))/365*12,2) as month_diff2
+     --round to 2 decimal
+     , ROUND((TO_DATE('20241001','yyyyMMdd') - TO_DATE('20231001','yyyyMMdd'))/365*12,2) as month_diff3
+    --just showing integer
+    --instead of round, can use 'ceil' or 'floor'
+     , TRUNC(TO_DATE('20241001','yyyyMMdd') 'MONTH') as firstdate
+    --showing first date of the month
+    --if want to show last date of the month, use 'LAST_DAY'
+from dual;
+
+select TO_CHAR(TO_DATE('20241001','yyyyMMdd'), 'Day') as date1 --Saturday
+     , TO_CHAR(TO_DATE('20241001','yyyyMMdd'), 'day') as date1 --saturday
+     , TO_CHAR(TO_DATE('20241001','yyyyMMdd'), 'Dy') as date1 --Sat
+     , TO_CHAR(TO_DATE('20241001','yyyyMMdd'), 'dy') as date1 --sat
+     , TO_CHAR(TO_DATE('20241001','yyyyMMdd'), 'd') as date1 --7
+from dual;
+
+--------------------------------------------------
+--left join: left key value is the standard, and add right table if the key value is the same
+--right join: right key value is the standard, and add left table if the key value is the same
+---inner join: intersection of left and right key value
+--full outer join: union of left and right key value 
+
+--join vs union
+--join: paste on right side of the table
+--union: paste under the table(columm has to be the same)
+    --union: automatically erase redundancy of key value
+    --union all: doesn't erase redundancy of key value
+
+CREATE TABLE dasql.CUST_INFO --table1
+(
+    CUST_NAME VARCHAR2(10) NOT NULL --not null: required to put the info
+    , age NUMBER(2)
+    , sex VARCHAR(3)
+)
+;
+
+COMMENT ON TABLE dasql.CUST_INFO IS 'customer_info'; 
+
+COMMENT ON COLUMN dasql.CUST_INFO.CUST_NAME IS 'customer_info'; 
+COMMENT ON COLUMN dasql.CUST_INFO.CUST_AGE IS 'age'; 
+COMMENT ON COLUMN dasql.CUST_INFO.CUST_SEX IS 'sex'; 
+
+INSERT INTO dasql.CUST_INFO VALUES('ALEX', 33,'M');
+INSERT INTO dasql.CUST_INFO VALUES('Daniel', 25,'M');
+INSERT INTO dasql.CUST_INFO VALUES('Grace', 28,'W');
+INSERT INTO dasql.CUST_INFO VALUES('Stephanie', 36,'W');
+
+SELECT * FROM dasql.CUST_INFO;
+
+
+
+
+CREATE TABLE dasql.CUST_BUY_INFO --table2
+(
+    CUST_NAME VARCHAR2(10) NOT NULL 
+    , BUY_DATE DATE
+    , BUY_NM VARCHAR2(30)
+    , PAY NUMBER(10)
+)
+;
+
+COMMENT ON COLUMN dasql.CUST_BUY_INFO.CUST_NAME IS 'cust_name'; 
+COMMENT ON COLUMN dasql.CUST_BUY_INFO.BUY_DATE IS 'buy_date'; 
+COMMENT ON COLUMN dasql.CUST_BUY_INFO.BUY_NM IS 'buy_nm'; 
+COMMENT ON COLUMN dasql.CUST_BUY_INFO.pay IS 'amount($)'; 
+
+INSERT INTO dasql.CUST_BUY_INFO VALUES('ALEX', TO_DATE('2024.10.14','yyyy.MM.dd'), 'shampoo', 20);
+INSERT INTO dasql.CUST_BUY_INFO VALUES('Daniel', TO_DATE('2024.10.15','yyyy.MM.dd'), 'chocolate', 40);
+INSERT INTO dasql.CUST_BUY_INFO VALUES('Grace', TO_DATE('2024.10.16','yyyy.MM.dd'), 'medicine', 50);
+INSERT INTO dasql.CUST_BUY_INFO VALUES('Stephanie', TO_DATE('2024.10.17','yyyy.MM.dd'), 'lego', 100);
+
+SELECT * FROM dasql.CUST_BUY_INFO;
+
+
+SELECT A.CUST_NAME
+    , A.AGE
+    , A.SEX
+    , B.BUY_DATE
+    , B.BUY_NM
+    , B.PAY
+FROM dasql.CUST_INFO A --call this table name as A
+LEFT JOIN dasql.CUST_BUY_INFO B ON A.CUST_NAME = B.CUST_NAME
+--if right join, switch select A.CUST_NAME as B.CUST_NAME
+
+
+TRUNCATE TABLE dasql.CUST_INFO if exists;
+DROP TABLE dasql.CUST_INFO if exists;
+
+--------------------------------------------------
+--ROW_NUMBER () OVER (PARTITION BY cust_name ORDER BY visit_day) as list1
+
+CREATE TABLE DASQL.PRACTICE_PARTITION_BY
+(
+    cust_name VARCHAR2(10) NOT NULL
+    , VST_DT DATE
+    , BUY_NM VARCHAR2(30)
+)
+
+INSERT INTO DASQL.PRACTICE_PARTITION_BY VALUES ('rabbit', TO_DATE('2024.10.15','yyyy.MM.dd'), 'chocolate');
+INSERT INTO DASQL.PRACTICE_PARTITION_BY VALUES ('rabbit', TO_DATE('2024.10.17','yyyy.MM.dd'), 'juice');
+INSERT INTO DASQL.PRACTICE_PARTITION_BY VALUES ('rabbit', TO_DATE('2024.10.19','yyyy.MM.dd'), 'milk');
+INSERT INTO DASQL.PRACTICE_PARTITION_BY VALUES ('bird', TO_DATE('2024.10.01','yyyy.MM.dd'), 'chocolate');
+INSERT INTO DASQL.PRACTICE_PARTITION_BY VALUES ('bird', TO_DATE('2024.10.05','yyyy.MM.dd'), 'protein');
+INSERT INTO DASQL.PRACTICE_PARTITION_BY VALUES ('bird', TO_DATE('2024.10.15','yyyy.MM.dd'), 'coke');
+INSERT INTO DASQL.PRACTICE_PARTITION_BY VALUES ('tiger', TO_DATE('2024.10.09','yyyy.MM.dd'), 'banana');
+INSERT INTO DASQL.PRACTICE_PARTITION_BY VALUES ('tiger', TO_DATE('2024.10.10','yyyy.MM.dd'), 'apple');
+
+select *
+from DASQL.PRACTICE_PARTITION_BY
+
+INSERT INTO DASQL.PRACTICE_PARTITION_BY VALUES('rabbit', NULL, 'vegetable')
+select * from DASQL.PRACTICE_PARTITION_BY ppb
+
+select cust_name as customer_name
+    , TO_CHAR(VST_DT, 'yyyy-MM-dd') as date
+    , BUY_NM as purchased_item
+    , row_number() over (PARTITION BY cust_name ORDER BY VST_DT) AS row_number1
+    , row_number() over (PARTITION BY cust_name, buy_nm ORDER BY VST_DT) AS row_number2
+    , row_number() over (PARTITION BY cust_name ORDER BY VST_DT DESC) AS row_number3
+    , row_number() over (PARTITION BY cust_name ORDER BY VST_DT DESC NULL LAST) AS row_number3
+    --buy date desceding order + null value is the last 
+
+CREATE TABLE DASQL.PRACTICE_RANK
+(
+    ST_NAME VARCHAR2(10) NOT NULL
+    , GRADE VARCHER2(10)
+)
+
+INSERT INTO DASQL.PRACTICE_RANK VALUES('Dog', 'A');
+INSERT INTO DASQL.PRACTICE_RANK VALUES('Cat', 'A');
+INSERT INTO DASQL.PRACTICE_RANK VALUES('Rabbit', 'B');
+INSERT INTO DASQL.PRACTICE_RANK VALUES('Cow', 'C');
+INSERT INTO DASQL.PRACTICE_RANK VALUES('Horse', 'D');
+INSERT INTO DASQL.PRACTICE_RANK VALUES('Turtle', 'D');
+
+SELECT ST_NAME as student
+    , GRADE as grade_report
+    , RANK()OVER(ORDER BY GRADE) as list1 --A(1),A(1),B(3),C,D,D
+    , RANK()OVER(ORDER BY GRADE DESC) as list2 --D,C,B,A
+    , DENSE_RANK()OVER(ORDER BY GRADE) as list3 --A(1),A(1),B(2),C(3),D,D
+    , NTILE(3)OVER(ORDER BY GRADE) as tile1 --A(1),A(1),B(1),C(2),D(2),D(2)
+FROM DASQL.PRACTICE_RANK
+
+--------------------------------------------------
+SELECT *
+FROM dasql.tb_pbtrnsp
+WHERE statn_nm LIKE '%NY%'
+
+SELECT statn_nm
+    , COUNT(*) AS number1
+    , MIN(begin_time) AS first_begin_time1
+    , MAX(begin_time) AS last_begin_time1 
+    , SUM(NMPR_CNT) AS sum --sum(count) of ppl
+    , SUM(NMPR_CNT) / COUNT(*) AS average1
+    , AVG(NMPR_CNT) AS average2
+FROM dasql.tb_pbtrnsp
+WHERE statn_nm LIKE '%NY%'
+GROUP BY statn_nm
+
+SELECT HO_LN
+    , SUM(CASE WHEN STATN_NM = 'LA' THEN 1 ELSE 0 END) AS LA1
+    , SUM(DECODE(STATN_NM,'LA',1,0)) AS LA2 --same as the above
+    , SUM(DECODE(STATN_NM,NULL,1,0)) AS NULL
+    , SUM(CASE WHEN STATN_NM IN ('LA','NY') THEN 1 ELSE 0 END) AS EX1
+    , SUM(CASE WHEN STATN_NM IN ('LA','NY') THEN NMPR_CNT ELSE 0 END) AS EX2
+    , SUM(DECODE(STATN_NM,'LA',1,'NY'1,0)) AS EX3
+    , SUM(DECODE(STATN_NM,'LA',NMPR_CNT,'NY',NMPR_CNT,0)) AS EX4
+
+SELECT STATN_NM
+    , COUNT(*) as total_count
+FROM dasql.tb_pbtrnsp
+GROUP BY STATN_NM 
+HAVING COUNT(*) >= 48
