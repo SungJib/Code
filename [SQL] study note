@@ -17,6 +17,7 @@ and begin_time between '1100' and '1500'
 or end time = '1200'
 
 --------------------------------------------------
+--[Day2] Time function
 select case when statn_nm <= 100 then 'under 100'
             when statn_nm <= 200 then 'under 200'
             when statn_nm <= 300 then 'under 300'
@@ -27,6 +28,7 @@ select case when statn_nm <= 100 then 'under 100'
         --gather station number + put 'hosun'
 
 --------------------------------------------------
+--[Day3] Table creation, Delete, Join
 select sysdate from dual;
 --select now();
 --select getdate();
@@ -83,7 +85,7 @@ select TO_CHAR(TO_DATE('20241001','yyyyMMdd'), 'Day') as date1 --Saturday
      , TO_CHAR(TO_DATE('20241001','yyyyMMdd'), 'd') as date1 --7
 from dual;
 
---------------------------------------------------
+
 --left join: left key value is the standard, and add right table if the key value is the same
 --right join: right key value is the standard, and add left table if the key value is the same
 ---inner join: intersection of left and right key value
@@ -156,6 +158,7 @@ TRUNCATE TABLE dasql.CUST_INFO if exists;
 DROP TABLE dasql.CUST_INFO if exists;
 
 --------------------------------------------------
+--[Day 4] Row Number, Rank
 --ROW_NUMBER () OVER (PARTITION BY cust_name ORDER BY visit_day) as list1
 
 CREATE TABLE DASQL.PRACTICE_PARTITION_BY
@@ -211,6 +214,7 @@ SELECT ST_NAME as student
 FROM DASQL.PRACTICE_RANK
 
 --------------------------------------------------
+--[Day5] Count, Min, Max
 SELECT *
 FROM dasql.tb_pbtrnsp
 WHERE statn_nm LIKE '%NY%'
@@ -240,3 +244,67 @@ SELECT STATN_NM
 FROM dasql.tb_pbtrnsp
 GROUP BY STATN_NM 
 HAVING COUNT(*) >= 48
+
+--------------------------------------------------
+--[Day6] Null - IF, Last, First, Coalesce
+SELECT *
+FROM Customer c
+
+Select CustomerID
+    , FirstName
+    , LastName
+    , City
+    , State
+    , IFNULL(State,0) AS State2 --if null, show it as 0
+    , IFNULL(State,'NA') AS State3
+From Customer c
+--ORDER BY State
+--ORDER BY State NULLS LAST (:put the NULL in last column)
+--ORDER BY State Nulls FIRST
+--ORDER BY State DESC
+ORDER BY State DESC NULLS FIRST
+;
+
+CREATE TABLE [Customer_TMP]
+(
+    [CustomerID] INTEGER NOT NULL,
+    [FirstName] NVARCHAR(40) NOT NULL,
+    [LastName] NVARCHAR(20) NOT NULL,
+    [Country] NVARCHER(40),
+    [State] NVARCHAR(40),
+)
+;
+
+INSERT INTO Customer_TMP(CustomerID, FirstName, LastName, Country,State)
+SELECT CustomerID, FirstName, LastName, Country, State
+FROM Customer
+;
+
+SELECT * 
+FROM Customer_TMP
+;
+
+INSERT INTO Customer_TMP(CustomerID, FirstName, LastName, Country,State)
+VALUES (60, 'Ashly', 'Kim', 'USA', NULL)
+       (50, 'Monica', 'Seo', 'USA', NULL)
+       (23, 'Robert', 'Ko', 'Korea', NULL)
+       (32, 'Alex', 'Kim', 'USA', NULL)
+       ;
+
+SELECT *
+    , row_number() over (PARTITION BY Country ORDER BY State) AS col1
+    , row_number() over (PARTITION BY Country ORDER BY State NULLS LAST) AS col2
+FROM Customer_TMP
+WHERE 1=1
+and Country in ('USA','Canada')
+ORDER BY country, state 
+;
+
+--Coalesce(A,B,C): Print A
+--                 If A is null, then print B
+--                 IF B is null, then print C
+
+--------------------------------------------------
+--[Day7] Subqueries
+
+
